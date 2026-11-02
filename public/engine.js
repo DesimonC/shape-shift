@@ -5,9 +5,9 @@ const EPS=1e-7;
 export function polygon(s) {
   const a=s.angle*Math.PI/180,c=Math.cos(a),n=Math.sin(a);
   let p;
-  if(s.type==='circle') p=Array.from({length:72},(_,i)=>[.9*Math.cos(i*Math.PI/36),.9*Math.sin(i*Math.PI/36)]);
-  else if(s.type==='square') p=[[-1.5,-1.5],[1.5,-1.5],[1.5,1.5],[-1.5,1.5]];
-  else if(s.type==='triangle') p=[[0,-1.8],[1.7,1.4],[-1.7,1.4]];
+  if(s.type==='circle') p=Array.from({length:72},(_,i)=>[1*Math.cos(i*Math.PI/36),1*Math.sin(i*Math.PI/36)]);
+  else if(s.type==='square') p=[[-2,-2],[2,-2],[2,2],[-2,2]];
+  else if(s.type==='triangle') p=[[0,-2],[2,2],[-2,2]];
   else p=[[-2,-.14],[2,-.14],[2,.14],[-2,.14]];
   return p.map(([x,y])=>[s.x+x*c-y*n,s.y+x*n+y*c]);
 }
@@ -26,7 +26,7 @@ export function clip(poly, boundary) {
 }
 const BOARD=[[0,0],[10,0],[10,10],[0,10]];
 export function inside(p,poly){return poly.every((v,i)=>cross(v,poly[(i+1)%poly.length],p)>=-EPS)}
-export function containsPoint(s,p){return s.type==='circle'?Math.hypot(p[0]-s.x,p[1]-s.y)<=.9+EPS:inside(p,polygon(s));}
+export function containsPoint(s,p){return s.type==='circle'?Math.hypot(p[0]-s.x,p[1]-s.y)<=1+EPS:inside(p,polygon(s));}
 export function touches(a,b){
   // Separating axis test includes edge contact; valid for our convex shapes.
   for(const poly of [a,b])for(let i=0;i<poly.length;i++){
@@ -51,7 +51,7 @@ export function validateLayout(layout) {
 export function circleInSquare(c,s){
   const a=-s.angle*Math.PI/180,dx=c.x-s.x,dy=c.y-s.y;
   const x=dx*Math.cos(a)-dy*Math.sin(a),y=dx*Math.sin(a)+dy*Math.cos(a);
-  return Math.abs(x)+.9<=1.5+EPS&&Math.abs(y)+.9<=1.5+EPS;
+  return Math.abs(x)+1<=2+EPS&&Math.abs(y)+1<=2+EPS;
 }
 // Exact union area, via inclusion/exclusion, for at most 12 opponent shapes.
 function unionIntersection(p,opponents,start=0) {

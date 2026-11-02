@@ -11,13 +11,13 @@ test('four different shapes required, integer snapping and bounded rotation',()=
 test('10% off-board limit uses area; own overlap rejected but edge touching allowed',()=>{
  assert.ok(validatePlacement(s('square',1,3)));assert.equal(validatePlacement(s('circle',1,1)),null);
  assert.ok(validatePlacement(s('circle',3,3),[s('square',3,3)]));
- assert.equal(area(clip(polygon(s('square',5,2)),polygon(s('square',2,2)))),0);
+ assert.equal(area(clip(polygon(s('square',6,2)),polygon(s('square',2,2)))),0);
  assert.equal(validatePlacement(s('circle',7,7),[s('square',2,2)]),null);
 });
 test('rotated clipping, area and touching stay consistent',()=>{
- const p=polygon(s('square',5,5,45));assert.ok(Math.abs(area(p)-9)<1e-7);
+ const p=polygon(s('square',5,5,45));assert.ok(Math.abs(area(p)-16)<1e-7);
  assert.ok(inside([5,5],p));assert.ok(!inside([0,0],p));
- assert.ok(Math.abs(area(clip(p,p))-9)<1e-7);
+ assert.ok(Math.abs(area(clip(p,p))-16)<1e-7);
  assert.ok(touches(p,polygon(s('circle',5,5))));assert.ok(!touches(p,polygon(s('circle',0,0))));
 });
 test('only triangle tips kill, never its middle or edges; square immune',()=>{
@@ -50,12 +50,12 @@ test('shared ultimate victory and eliminated circle cannot win',()=>{
 });
 test('containment accounts for square rotation and full radius',()=>{
  assert.ok(circleInSquare(s('circle',5,5),s('square',5,5,45)));
- assert.ok(!circleInSquare(s('circle',6,5),s('square',5,5,45)));
+ assert.ok(!circleInSquare(s('circle',7,5),s('square',5,5,45)));
 });
 test('clear area scoring double circle, union overlap counted once, shared ties',()=>{
  const r=resolve([[s('circle',2,2)],[s('circle',8,8)]]);assert.equal(r.scores[0].total,200);assert.deepEqual(r.winners,[0,1]);
  const overlap=resolve([[s('square',5,5)],[s('square',6,5)],[s('square',6,5)]]);
- assert.ok(Math.abs(overlap.scores[0].total-100/3)<1e-6);
+ assert.ok(Math.abs(overlap.scores[0].total-25)<1e-6);
 });
 test('no mutation of inputs, off-board area excluded from score',()=>{
  const layouts=[[s('square',1,3)],[s('circle',8,8)]];const before=structuredClone(layouts);const r=resolve(layouts);
@@ -71,4 +71,15 @@ test('50 complete four-player games have valid finite scores and a winner',()=>{
   const r=resolve(Array.from({length:4},()=>computerLayout(rng)));
   assert.ok(r.winners.length);for(const p of r.scores)assert.ok(Number.isFinite(p.total)&&p.total>=0&&p.total<=500.00001);
  }
+});
+
+test('snap grid allows deliberate barrier protection without own overlap',()=>{
+ const square=s('square',3,3),barrier=s('barrier',7,3);
+ assert.equal(validatePlacement(barrier,[square]),null);
+ assert.ok(touches(polygon(square),polygon(barrier)));
+ const circle=s('circle',4,7),line=s('barrier',7,7);
+ assert.equal(validatePlacement(line,[circle]),null);
+ assert.ok(touches(polygon(circle),polygon(line)));
+ const r=resolve([[s('circle',4,7),s('barrier',7,7)],[s('triangle',4,9)]]);
+ assert.ok(!r.removed.includes('0-circle'));assert.ok(r.removed.includes('0-barrier'));
 });
