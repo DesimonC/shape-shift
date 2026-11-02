@@ -65,9 +65,13 @@ export function resolve(layouts) {
   const shapes=layouts.flatMap((layout,owner)=>layout.map(s=>({...s,owner,id:`${owner}-${s.type}`})));
   const polygons=new Map(shapes.map(s=>[s.id,polygon(s)])),removed=new Set(),events=[];
   const barriers=shapes.filter(s=>s.type==='barrier');
-  // Snapshot resolution: destroyed triangles still attack, sacrificed barriers still protect this reveal.
-  for(const tri of shapes.filter(s=>s.type==='triangle'))for(const [tipIndex,tip] of polygons.get(tri.id).entries()){
-    const targets=shapes.filter(t=>t.owner!==tri.owner&&t.type!=='square'&&containsPoint(t,tip));
+  // Resolve triangle duels simultaneously first, then only survivors attack
+  // other shapes. Barriers protect throughout both stages of the reveal.
+  const triangles=shapes.filter(s=>s.type==='triangle');
+  function attack(attackers,duels){
+  for(const tri of attackers)for(const [tipIndex,tip] of polygons.get(tri.id).entries()){
+    const targets=shapes.filter(t=>t.owner!==tri.owner&&t.type!=='square'&&(duels?t.type==='triangle':t.type!=='triangle')&&containsPoint(t,tip));
+    if(duels&&!targets.length)continue;
     const direct=barriers.filter(b=>inside(tip,polygons.get(b.id)));
     if(direct.length){for(const b of direct){removed.add(b.id);events.push({kind:'block',by:b.id,target:tri.id,tip:tipIndex})}continue;}
     for(const target of targets){
@@ -76,6 +80,9 @@ export function resolve(layouts) {
       else {removed.add(target.id);events.push({kind:'destroy',by:tri.id,target:target.id,tip:tipIndex})}
     }
   }
+  }
+  attack(triangles,true);
+  attack(triangles.filter(t=>!removed.has(t.id)),false);
   const survivors=shapes.filter(s=>!removed.has(s.id));
   const ultimate=[...new Set(survivors.filter(c=>c.type==='circle'&&survivors.some(s=>s.type==='square'&&s.owner!==c.owner&&circleInSquare(c,s))).map(c=>c.owner))];
   const scores=layouts.map((_,owner)=>{

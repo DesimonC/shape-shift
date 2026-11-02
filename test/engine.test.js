@@ -29,6 +29,26 @@ test('mutual triangle destruction is simultaneous and deterministic',()=>{
  const r=resolve(layouts);assert.deepEqual(new Set(r.removed),new Set(['0-triangle','1-triangle']));
  assert.deepEqual(resolve(layouts),r);
 });
+test('mutually destroyed triangles cannot destroy circles',()=>{
+ const r=resolve([[s('triangle',5,5)],[s('triangle',5,3,180)],[s('circle',7,7),s('circle',3,1)]]);
+ assert.deepEqual(new Set(r.removed),new Set(['0-triangle','1-triangle']));
+ assert.ok(r.events.every(e=>e.target.endsWith('triangle')));
+});
+test('one-way triangle elimination suppresses the victim attacks regardless of player order',()=>{
+ // A tip at (5,3) hits B, whose tip at (7,4) would hit the circle.
+ const a=s('triangle',5,5),b=s('triangle',5,2),c=s('circle',7,4);
+ for(const layouts of [[[a],[b],[c]],[[b],[a],[c]]]){
+  const r=resolve(layouts),victim=layouts.findIndex(l=>l[0]===b);
+  assert.deepEqual(r.removed,[`${victim}-triangle`]);
+  assert.ok(!r.events.some(e=>e.target==='2-circle'));
+ }
+});
+test('a barrier-protected triangle survives the duel and still attacks',()=>{
+ const r=resolve([[s('triangle',5,5)],[s('triangle',5,2),s('barrier',5,0)],[s('circle',7,4)]]);
+ assert.ok(!r.removed.includes('1-triangle'));
+ assert.ok(r.removed.includes('1-barrier'));
+ assert.ok(r.removed.includes('2-circle'));
+});
 test('a barrier touching a target sacrifices itself and protects any owner',()=>{
  const r=resolve([[s('triangle',5,5)],[s('circle',5,3)],[s('barrier',5,2,0)]]);
  assert.ok(!r.removed.includes('1-circle'));assert.ok(r.removed.includes('2-barrier'));assert.ok(r.events.some(e=>e.kind==='block'));

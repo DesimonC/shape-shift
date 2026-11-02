@@ -15,9 +15,9 @@ Computers generate valid layouts independently **before** your turn and never re
 
 Each player places one triangle, square, circle and line barrier. Positions snap to the intersections of a 10×10 grid. Rotation uses 15° steps. Own shapes cannot overlap; touching edges is allowed. At least 90% of each shape's area must remain on board.
 
-All shapes stay private until everyone locks in. The reveal fades the grid, resolves triangle-tip attacks simultaneously, checks Ultimate Victory, then scores.
+All shapes stay private until everyone locks in. The reveal fades the grid, resolves triangle duels first and then attacks from surviving triangles, checks Ultimate Victory, then scores.
 
-- **Triangle:** only its three tips eliminate vulnerable opponent shapes. Destroyed triangles still attack in that reveal, allowing mutual destruction.
+- **Triangle:** only its three tips eliminate vulnerable opponent shapes. Triangle duels resolve simultaneously, allowing mutual destruction. Eliminated triangles cannot attack other shapes.
 - **Square:** immune to triangle-tip attacks.
 - **Line barrier:** protects any shape it touches, including opponents. Sacrifices itself to absorb attacks on touching shapes or tips hitting the line itself. Protection lasts for that simultaneous reveal.
 - **Circle:** smaller than the square. A surviving circle completely inside an opponent's square triggers Ultimate Victory. All qualifying players share that victory, overriding normal scores.
