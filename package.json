@@ -1,0 +1,5 @@
+{
+  "name": "shape-shifters", "version": "1.0.0", "private": true, "type": "module",
+  "scripts": {"test":"node --test test/*.test.js", "build":"node scripts/build.js", "dev":"node scripts/dev.js"},
+  "dependencies": {"@netlify/blobs":"^10.0.0"}, "engines":{"node":">=22"}
+}
